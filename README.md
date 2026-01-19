@@ -17,7 +17,7 @@
 
 
 
-Hi, I’m **Anil** — a passionate, detail-oriented, and solution-driven **Full-Stack Software Developer** with over **3 years** of experience in architecting and building robust web applications from the ground up.
+Hi, I’m **Anil** — a passionate, detail-oriented, and solution-driven **Full-Stack Software Developer** with over **3.5+ years** of experience in architecting and building robust web applications from the ground up.
 
 Whether it's designing intuitive UIs, building powerful APIs, or deploying scalable cloud infrastructure, I love solving problems through clean, efficient, and maintainable code. I specialize in the **Node.js + React** ecosystem but I’m always experimenting with new tools and frameworks that improve performance and developer experience.
 
