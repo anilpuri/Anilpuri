@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+
+/* hook in your existing tailwind.config.ts (colors, radii, etc.) */
+@config "../../../tailwind.config.ts";
+
+/* plugins */
+@plugin "@tailwindcss/typography";
+@plugin "tailwindcss-animate";
+
+/* Google fonts */
+
+/* v4: define theme tokens with @theme */
+@theme {
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* map to Tailwind font families so you can use font-sans / font-display etc. */
+  --font-sans: var(--font-body);
+  --font-display-family: var(--font-display);
+
+  /* color tokens */
+  --color-background: hsl(210 40% 98%);
+  --color-foreground: hsl(222 47% 11%);
+
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(222 47% 11%);
+
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(222 47% 11%);
+
+  --color-primary: hsl(221 83% 53%);
+  --color-primary-foreground: hsl(210 40% 98%);
+
+  --color-secondary: hsl(210 40% 96%);
+  --color-secondary-foreground: hsl(222 47% 11%);
+
+  --color-muted: hsl(210 40% 96%);
+  --color-muted-foreground: hsl(215 16% 47%);
+
+  --color-accent: hsl(250 84% 65%);
+  --color-accent-foreground: hsl(210 40% 98%);
+
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+
+  --color-border: hsl(214 32% 91%);
+  --color-input: hsl(214 32% 91%);
+  --color-ring: hsl(221 83% 53%);
+
+  /* radius token used by rounded-lg etc. */
+  --radius: 0.75rem;
+}
+
+/* base styles (replaces @layer base) */
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-body);
+}
+
+/* selection styles (no @apply in pseudo‑elements in v4) */
+::selection {
+  background-color: hsl(221 83% 53% / 0.2); /* primary/20 equivalent */
+  color: var(--color-primary);
+}
+
+/* headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: #0f172a; /* slate-900 */
+}
+
+/* components (replaces @layer components) */
+
+.container-custom {
+  max-width: 80rem; /* max-w-7xl */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem; /* px-4 */
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    padding-left: 1.5rem; /* sm:px-6 */
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    padding-left: 2rem; /* lg:px-8 */
+    padding-right: 2rem;
+  }
+}
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  border-width: 1px;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 10px 15px -3px rgba(15, 23, 42, 0.05),
+    0 4px 6px -4px rgba(79, 70, 229, 0.05); /* approximate shadow-indigo-500/5 */
+}
+
+.section-padding {
+  padding-top: 4rem; /* py-16 */
+  padding-bottom: 4rem;
+}
+.section-head-padding {
+  padding-top: 4rem; /* py-16 */
+}
+.section-bottom-padding {
+  padding-bottom: 4rem; /* py-16 */
+}
+
+@media (min-width: 768px) {
+  .section-padding {
+    padding-top: 6rem; /* md:py-24 */
+    padding-bottom: 6rem;
+  }
+  .section-head-padding {
+    padding-top: 6rem; /* md:py-24 */
+  }
+  .section-bottom-padding {
+    padding-bottom: 6rem; /* md:py-24 */
+  }
+}
+
+.nav-link {
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: rgb(148, 163, 184); /* text-slate-600 */
+  position: relative;
+  transition-property: color;
+  transition-duration: 200ms;
+}
+
+.nav-link:hover {
+  color: hsl(221 83% 53%); /* primary */
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: 0;
+  width: 0;
+  height: 2px;
+  background-color: hsl(221 83% 53%);
+  transition-property: width;
+  transition-duration: 300ms;
+  transition-timing-function: ease-out;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* scrollbar (no @apply in pseudo-elements in v4) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(226, 232, 240); /* slate-200 */
+  border-radius: 9999px;
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(203, 213, 225); /* slate-300 */
+}

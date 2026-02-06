@@ -68,31 +68,63 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    pages: Page;
     media: Media;
+    'skill-categories': SkillCategory;
+    skills: Skill;
+    languages: Language;
+    'social-accounts': SocialAccount;
+    experience: Experience;
+    achievements: Achievement;
+    education: Education;
+    certifications: Certification;
+    projects: Project;
+    'personal-details': PersonalDetail;
+    connects: Connect;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'skill-categories': {
+      relatedSkills: 'skills';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'skill-categories': SkillCategoriesSelect<false> | SkillCategoriesSelect<true>;
+    skills: SkillsSelect<false> | SkillsSelect<true>;
+    languages: LanguagesSelect<false> | LanguagesSelect<true>;
+    'social-accounts': SocialAccountsSelect<false> | SocialAccountsSelect<true>;
+    experience: ExperienceSelect<false> | ExperienceSelect<true>;
+    achievements: AchievementsSelect<false> | AchievementsSelect<true>;
+    education: EducationSelect<false> | EducationSelect<true>;
+    certifications: CertificationsSelect<false> | CertificationsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    'personal-details': PersonalDetailsSelect<false> | PersonalDetailsSelect<true>;
+    connects: ConnectsSelect<false> | ConnectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
-  locale: null;
-  user: User & {
-    collection: 'users';
+  globals: {
+    header: Header;
+    footer: Footer;
   };
+  globalsSelect: {
+    header: HeaderSelect<false> | HeaderSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+  };
+  locale: null;
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -121,7 +153,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -139,14 +171,388 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
+}
+/**
+ * Manage static and dynamic pages with flexible layouts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  /**
+   * This is used as the page heading and admin title.
+   */
+  title: string;
+  /**
+   * URL path (without leading slash)
+   */
+  slug: string;
+  /**
+   * Build the page using flexible content blocks.
+   */
+  layout?:
+    | (
+        | {
+            title: string;
+            subtitle?: string | null;
+            /**
+             * URL-friendly slug
+             */
+            slug?: string | null;
+            /**
+             * Choose the visual style for this section
+             */
+            style?: ('style1' | 'style2' | 'style3') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'section-head';
+          }
+        | {
+            showBadge?: boolean | null;
+            badgeText?: string | null;
+            headingText: string;
+            highlightStyle?: ('primary' | 'gradient' | 'underline') | null;
+            introText?: string | null;
+            primaryCTA?: {
+              show?: boolean | null;
+              text?: string | null;
+              /**
+               * URL or page slug
+               */
+              link?: string | null;
+            };
+            secondaryCTA?: {
+              show?: boolean | null;
+              text?: string | null;
+              icon?: string | null;
+              action?: ('download-resume' | 'custom-link') | null;
+              link?: string | null;
+            };
+            showSocialLinks?: boolean | null;
+            /**
+             * Select which social accounts to display in Hero
+             */
+            socialAccounts?: (number | SocialAccount)[] | null;
+            showHeroImage?: boolean | null;
+            /**
+             * Key resolved from personal details or global config
+             */
+            heroImageKey?: string | null;
+            floatingBadges?:
+              | {
+                  show?: boolean | null;
+                  position:
+                    | 'top-left'
+                    | 'top-right'
+                    | 'bottom-left'
+                    | 'bottom-right'
+                    | 'middle-left'
+                    | 'middle-right'
+                    | 'bottom-middle'
+                    | 'top-middle';
+                  /**
+                   * Show icon
+                   */
+                  enableIcon?: boolean | null;
+                  /**
+                   * Optional icon shown with this achievement
+                   */
+                  icon?: {
+                    enabled?: boolean | null;
+                    type?: ('lib' | 'image') | null;
+                    lib?: {
+                      /**
+                       * Icon name
+                       */
+                      name: string;
+                    };
+                    image?: (number | null) | Media;
+                    /**
+                     * Optional visual styling
+                     */
+                    style?: {
+                      styleEnabled?: boolean | null;
+                      color?: string | null;
+                      'bg-color'?: string | null;
+                      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                    };
+                  };
+                  title?: string | null;
+                  value?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            layout?: ('image-right' | 'image-left') | null;
+            contentAlignment?: ('left' | 'center') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            itemsPerRow: number;
+            sourceType: 'manual' | 'collection';
+            manualConfig?: {
+              style: 'styleOne' | 'styleTwo';
+              cards?:
+                | {
+                    /**
+                     * Show icon
+                     */
+                    enableIcon?: boolean | null;
+                    /**
+                     * Optional icon shown with this achievement
+                     */
+                    icon?: {
+                      enabled?: boolean | null;
+                      type?: ('lib' | 'image') | null;
+                      lib?: {
+                        /**
+                         * Icon name
+                         */
+                        name: string;
+                      };
+                      image?: (number | null) | Media;
+                      /**
+                       * Optional visual styling
+                       */
+                      style?: {
+                        styleEnabled?: boolean | null;
+                        color?: string | null;
+                        'bg-color'?: string | null;
+                        shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                      };
+                    };
+                    title: string;
+                    subtitle?: string | null;
+                    description?: string | null;
+                    date?: string | null;
+                    id?: string | null;
+                  }[]
+                | null;
+            };
+            collectionConfig?: {
+              collection:
+                | 'achievements'
+                | 'certifications'
+                | 'education'
+                | 'experience'
+                | 'projects'
+                | 'skill-categories'
+                | 'skills';
+              fetchType: 'infinite' | 'selective';
+              items?:
+                | (
+                    | {
+                        relationTo: 'achievements';
+                        value: number | Achievement;
+                      }
+                    | {
+                        relationTo: 'certifications';
+                        value: number | Certification;
+                      }
+                    | {
+                        relationTo: 'education';
+                        value: number | Education;
+                      }
+                    | {
+                        relationTo: 'experience';
+                        value: number | Experience;
+                      }
+                    | {
+                        relationTo: 'projects';
+                        value: number | Project;
+                      }
+                    | {
+                        relationTo: 'skill-categories';
+                        value: number | SkillCategory;
+                      }
+                    | {
+                        relationTo: 'skills';
+                        value: number | Skill;
+                      }
+                  )[]
+                | null;
+              paginationType?: ('loadMore' | 'pagination') | null;
+              itemsPerPage?: number | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gridCards';
+          }
+        | {
+            visibility?: {
+              showEmail?: boolean | null;
+              showLocation?: boolean | null;
+              showQuote?: boolean | null;
+              showForm?: boolean | null;
+            };
+            quote?: string | null;
+            form?: {
+              nameLabel?: string | null;
+              emailLabel?: string | null;
+              messageLabel?: string | null;
+              messagePlaceholder?: string | null;
+              buttonText?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'get-in-touch';
+          }
+        | {
+            heading: {
+              title: string;
+              subtitle?: string | null;
+              /**
+               * Show icon
+               */
+              enableIcon?: boolean | null;
+              /**
+               * Optional icon shown with this achievement
+               */
+              icon?: {
+                enabled?: boolean | null;
+                type?: ('lib' | 'image') | null;
+                lib?: {
+                  /**
+                   * Icon name
+                   */
+                  name: string;
+                };
+                image?: (number | null) | Media;
+                /**
+                 * Optional visual styling
+                 */
+                style?: {
+                  styleEnabled?: boolean | null;
+                  color?: string | null;
+                  'bg-color'?: string | null;
+                  shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                };
+              };
+            };
+            members?:
+              | {
+                  name: string;
+                  role?: string | null;
+                  email?: string | null;
+                  profileUrl?: string | null;
+                  avatar?: (number | null) | Media;
+                  /**
+                   * Mark as active contributor
+                   */
+                  isActive?: boolean | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Visual behavior controlled by renderer
+             */
+            displayOptions?: {
+              showEmail?: boolean | null;
+              showStatus?: boolean | null;
+              inactiveStyle?: ('faded' | 'labeled' | 'both') | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'team-members';
+          }
+        | {
+            title?: string | null;
+            subtitle?: string | null;
+            linkText?: string | null;
+            link?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contact-me';
+          }
+        | {
+            /**
+             * Recommended: 50–60 characters
+             */
+            title: string;
+            /**
+             * Recommended: 150–160 characters
+             */
+            description: string;
+            /**
+             * Recommended size: 1200×630
+             */
+            image?: (number | null) | Media;
+            noIndex?: boolean | null;
+            canonicalUrl?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'seo';
+          }
+      )[]
+    | null;
+  /**
+   * Control global page elements
+   */
+  pageSettings?: {
+    showHeader?: boolean | null;
+    showFooter?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "social-accounts".
+ */
+export interface SocialAccount {
+  id: number;
+  name: string;
+  /**
+   * Full URL to the social profile
+   */
+  profileLink: string;
+  /**
+   * Optional icon shown with this achievement
+   */
+  icon?: {
+    enabled?: boolean | null;
+    type?: ('lib' | 'image') | null;
+    lib?: {
+      /**
+       * Icon name
+       */
+      name: string;
+    };
+    image?: (number | null) | Media;
+    /**
+     * Optional visual styling
+     */
+    style?: {
+      styleEnabled?: boolean | null;
+      color?: string | null;
+      'bg-color'?: string | null;
+      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+    };
+  };
+  /**
+   * Order in which this account appears
+   */
+  order?: number | null;
+  /**
+   * Optional note or internal reference
+   */
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
+  _key?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -160,11 +566,1086 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * Manage awards, certifications, and recognitions.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "achievements".
+ */
+export interface Achievement {
+  id: number;
+  title: string;
+  organization?: string | null;
+  /**
+   * Date the achievement was awarded
+   */
+  date: string;
+  description?: string | null;
+  /**
+   * Optional icon shown with this achievement
+   */
+  icon?: {
+    enabled?: boolean | null;
+    type?: ('lib' | 'image') | null;
+    lib?: {
+      /**
+       * Icon name
+       */
+      name: string;
+    };
+    image?: (number | null) | Media;
+    /**
+     * Optional visual styling
+     */
+    style?: {
+      styleEnabled?: boolean | null;
+      color?: string | null;
+      'bg-color'?: string | null;
+      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+    };
+  };
+  /**
+   * Highlight this on homepage or key sections
+   */
+  isFeatured?: boolean | null;
+  /**
+   * Lower numbers appear first
+   */
+  order?: number | null;
+  /**
+   * Internal notes (not shown on site)
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Manage professional certifications and credentials.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certifications".
+ */
+export interface Certification {
+  id: number;
+  title: string;
+  issuingOrganization: string;
+  issueDate: string;
+  /**
+   * Leave empty if the certification does not expire
+   */
+  expiryDate?: string | null;
+  /**
+   * Optional description or context (not shown publicly)
+   */
+  notes?: string | null;
+  credentialID?: string | null;
+  /**
+   * Public URL to verify this certification
+   */
+  credentialURL?: string | null;
+  /**
+   * Optional icon shown with this achievement
+   */
+  icon?: {
+    enabled?: boolean | null;
+    type?: ('lib' | 'image') | null;
+    lib?: {
+      /**
+       * Icon name
+       */
+      name: string;
+    };
+    image?: (number | null) | Media;
+    /**
+     * Optional visual styling
+     */
+    style?: {
+      styleEnabled?: boolean | null;
+      color?: string | null;
+      'bg-color'?: string | null;
+      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+    };
+  };
+  /**
+   * Highlight this certification on homepage or key sections
+   */
+  isFeatured?: boolean | null;
+  /**
+   * Lower numbers appear first
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Manage academic education details.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "education".
+ */
+export interface Education {
+  id: number;
+  degree: string;
+  institution: string;
+  fieldOfStudy?: string | null;
+  grade?: string | null;
+  /**
+   * Start date of the program
+   */
+  startDate: string;
+  /**
+   * End date (hidden if currently studying)
+   */
+  endDate?: string | null;
+  isCurrent?: boolean | null;
+  /**
+   * Awards, honors, or recognitions during this education
+   */
+  achievements?:
+    | {
+        title: string;
+        description?: string | null;
+        isActive?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional icon shown with this achievement
+   */
+  icon?: {
+    enabled?: boolean | null;
+    type?: ('lib' | 'image') | null;
+    lib?: {
+      /**
+       * Icon name
+       */
+      name: string;
+    };
+    image?: (number | null) | Media;
+    /**
+     * Optional visual styling
+     */
+    style?: {
+      styleEnabled?: boolean | null;
+      color?: string | null;
+      'bg-color'?: string | null;
+      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+    };
+  };
+  /**
+   * Lower numbers appear first
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experience".
+ */
+export interface Experience {
+  id: number;
+  company: string;
+  role: string;
+  location?: string | null;
+  employmentType?: ('full-time' | 'part-time' | 'contract' | 'internship') | null;
+  startDate: string;
+  /**
+   * Leave empty if current
+   */
+  endDate?: string | null;
+  /**
+   * Currently working here
+   */
+  isCurrent?: boolean | null;
+  /**
+   * Select skills or technologies used
+   */
+  technologies?: (number | Skill)[] | null;
+  /**
+   * Key responsibilities or achievements
+   */
+  experiencePoints?:
+    | {
+        title: string;
+        description?: string | null;
+        /**
+         * Hide this point without deleting
+         */
+        isActive?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Display order (lower comes first)
+   */
+  order?: number | null;
+  /**
+   * Show or hide this experience
+   */
+  isActive?: boolean | null;
+  /**
+   * Internal notes (not shown on site)
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skills".
+ */
+export interface Skill {
+  id: number;
+  name: string;
+  category: number | SkillCategory;
+  /**
+   * Optional icon shown with this achievement
+   */
+  icon?: {
+    enabled?: boolean | null;
+    type?: ('lib' | 'image') | null;
+    lib?: {
+      /**
+       * Icon name
+       */
+      name: string;
+    };
+    image?: (number | null) | Media;
+    /**
+     * Optional visual styling
+     */
+    style?: {
+      styleEnabled?: boolean | null;
+      color?: string | null;
+      'bg-color'?: string | null;
+      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+    };
+  };
+  isFeatured?: boolean | null;
+  /**
+   * Overall proficiency level for this skill (optional)
+   */
+  Proficiency?: ('' | 'beginner' | 'intermediate' | 'advanced' | 'expert') | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skill-categories".
+ */
+export interface SkillCategory {
+  id: number;
+  name: string;
+  /**
+   * Order in which categories are displayed
+   */
+  order?: number | null;
+  /**
+   * Show or hide this category without deleting
+   */
+  isActive?: boolean | null;
+  /**
+   * Optional icon shown with this achievement
+   */
+  icon?: {
+    enabled?: boolean | null;
+    type?: ('lib' | 'image') | null;
+    lib?: {
+      /**
+       * Icon name
+       */
+      name: string;
+    };
+    image?: (number | null) | Media;
+    /**
+     * Optional visual styling
+     */
+    style?: {
+      styleEnabled?: boolean | null;
+      color?: string | null;
+      'bg-color'?: string | null;
+      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+    };
+  };
+  /**
+   * Internal notes for this category
+   */
+  notes?: string | null;
+  /**
+   * List of skills belonging to this category (populated automatically)
+   */
+  relatedSkills?: {
+    docs?: (number | Skill)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  subtitle?: string | null;
+  overview?: string | null;
+  /**
+   * Main banner image for the project
+   */
+  banner?: (number | null) | Media;
+  /**
+   * Show icon
+   */
+  enableIcon?: boolean | null;
+  /**
+   * Optional icon shown with this achievement
+   */
+  icon?: {
+    enabled?: boolean | null;
+    type?: ('lib' | 'image') | null;
+    lib?: {
+      /**
+       * Icon name
+       */
+      name: string;
+    };
+    image?: (number | null) | Media;
+    /**
+     * Optional visual styling
+     */
+    style?: {
+      styleEnabled?: boolean | null;
+      color?: string | null;
+      'bg-color'?: string | null;
+      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+    };
+  };
+  /**
+   * External links related to the project
+   */
+  links?:
+    | {
+        label: string;
+        url: string;
+        /**
+         * Optional icon shown with this achievement
+         */
+        icon?: {
+          enabled?: boolean | null;
+          type?: ('lib' | 'image') | null;
+          lib?: {
+            /**
+             * Icon name
+             */
+            name: string;
+          };
+          image?: (number | null) | Media;
+          /**
+           * Optional visual styling
+           */
+          style?: {
+            styleEnabled?: boolean | null;
+            color?: string | null;
+            'bg-color'?: string | null;
+            shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+          };
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Select technologies used in this project
+   */
+  technologies?: (number | Skill)[] | null;
+  /**
+   * Order for project listing
+   */
+  order?: number | null;
+  /**
+   * Internal CMS notes
+   */
+  notes?: string | null;
+  /**
+   * Choose the visual style for the project page
+   */
+  style?: ('style1' | 'style2' | 'style3') | null;
+  /**
+   * Add additional sections to the project page
+   */
+  blocks?:
+    | (
+        | {
+            title: string;
+            subtitle?: string | null;
+            /**
+             * URL-friendly slug
+             */
+            slug?: string | null;
+            /**
+             * Choose the visual style for this section
+             */
+            style?: ('style1' | 'style2' | 'style3') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'section-head';
+          }
+        | {
+            showBadge?: boolean | null;
+            badgeText?: string | null;
+            headingText: string;
+            highlightStyle?: ('primary' | 'gradient' | 'underline') | null;
+            introText?: string | null;
+            primaryCTA?: {
+              show?: boolean | null;
+              text?: string | null;
+              /**
+               * URL or page slug
+               */
+              link?: string | null;
+            };
+            secondaryCTA?: {
+              show?: boolean | null;
+              text?: string | null;
+              icon?: string | null;
+              action?: ('download-resume' | 'custom-link') | null;
+              link?: string | null;
+            };
+            showSocialLinks?: boolean | null;
+            /**
+             * Select which social accounts to display in Hero
+             */
+            socialAccounts?: (number | SocialAccount)[] | null;
+            showHeroImage?: boolean | null;
+            /**
+             * Key resolved from personal details or global config
+             */
+            heroImageKey?: string | null;
+            floatingBadges?:
+              | {
+                  show?: boolean | null;
+                  position:
+                    | 'top-left'
+                    | 'top-right'
+                    | 'bottom-left'
+                    | 'bottom-right'
+                    | 'middle-left'
+                    | 'middle-right'
+                    | 'bottom-middle'
+                    | 'top-middle';
+                  /**
+                   * Show icon
+                   */
+                  enableIcon?: boolean | null;
+                  /**
+                   * Optional icon shown with this achievement
+                   */
+                  icon?: {
+                    enabled?: boolean | null;
+                    type?: ('lib' | 'image') | null;
+                    lib?: {
+                      /**
+                       * Icon name
+                       */
+                      name: string;
+                    };
+                    image?: (number | null) | Media;
+                    /**
+                     * Optional visual styling
+                     */
+                    style?: {
+                      styleEnabled?: boolean | null;
+                      color?: string | null;
+                      'bg-color'?: string | null;
+                      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                    };
+                  };
+                  title?: string | null;
+                  value?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            layout?: ('image-right' | 'image-left') | null;
+            contentAlignment?: ('left' | 'center') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            itemsPerRow: number;
+            sourceType: 'manual' | 'collection';
+            manualConfig?: {
+              style: 'styleOne' | 'styleTwo';
+              cards?:
+                | {
+                    /**
+                     * Show icon
+                     */
+                    enableIcon?: boolean | null;
+                    /**
+                     * Optional icon shown with this achievement
+                     */
+                    icon?: {
+                      enabled?: boolean | null;
+                      type?: ('lib' | 'image') | null;
+                      lib?: {
+                        /**
+                         * Icon name
+                         */
+                        name: string;
+                      };
+                      image?: (number | null) | Media;
+                      /**
+                       * Optional visual styling
+                       */
+                      style?: {
+                        styleEnabled?: boolean | null;
+                        color?: string | null;
+                        'bg-color'?: string | null;
+                        shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                      };
+                    };
+                    title: string;
+                    subtitle?: string | null;
+                    description?: string | null;
+                    date?: string | null;
+                    id?: string | null;
+                  }[]
+                | null;
+            };
+            collectionConfig?: {
+              collection:
+                | 'achievements'
+                | 'certifications'
+                | 'education'
+                | 'experience'
+                | 'projects'
+                | 'skill-categories'
+                | 'skills';
+              fetchType: 'infinite' | 'selective';
+              items?:
+                | (
+                    | {
+                        relationTo: 'achievements';
+                        value: number | Achievement;
+                      }
+                    | {
+                        relationTo: 'certifications';
+                        value: number | Certification;
+                      }
+                    | {
+                        relationTo: 'education';
+                        value: number | Education;
+                      }
+                    | {
+                        relationTo: 'experience';
+                        value: number | Experience;
+                      }
+                    | {
+                        relationTo: 'projects';
+                        value: number | Project;
+                      }
+                    | {
+                        relationTo: 'skill-categories';
+                        value: number | SkillCategory;
+                      }
+                    | {
+                        relationTo: 'skills';
+                        value: number | Skill;
+                      }
+                  )[]
+                | null;
+              paginationType?: ('loadMore' | 'pagination') | null;
+              itemsPerPage?: number | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gridCards';
+          }
+        | {
+            visibility?: {
+              showEmail?: boolean | null;
+              showLocation?: boolean | null;
+              showQuote?: boolean | null;
+              showForm?: boolean | null;
+            };
+            quote?: string | null;
+            form?: {
+              nameLabel?: string | null;
+              emailLabel?: string | null;
+              messageLabel?: string | null;
+              messagePlaceholder?: string | null;
+              buttonText?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'get-in-touch';
+          }
+        | {
+            heading: {
+              title: string;
+              subtitle?: string | null;
+              /**
+               * Show icon
+               */
+              enableIcon?: boolean | null;
+              /**
+               * Optional icon shown with this achievement
+               */
+              icon?: {
+                enabled?: boolean | null;
+                type?: ('lib' | 'image') | null;
+                lib?: {
+                  /**
+                   * Icon name
+                   */
+                  name: string;
+                };
+                image?: (number | null) | Media;
+                /**
+                 * Optional visual styling
+                 */
+                style?: {
+                  styleEnabled?: boolean | null;
+                  color?: string | null;
+                  'bg-color'?: string | null;
+                  shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                };
+              };
+            };
+            members?:
+              | {
+                  name: string;
+                  role?: string | null;
+                  email?: string | null;
+                  profileUrl?: string | null;
+                  avatar?: (number | null) | Media;
+                  /**
+                   * Mark as active contributor
+                   */
+                  isActive?: boolean | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Visual behavior controlled by renderer
+             */
+            displayOptions?: {
+              showEmail?: boolean | null;
+              showStatus?: boolean | null;
+              inactiveStyle?: ('faded' | 'labeled' | 'both') | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'team-members';
+          }
+        | {
+            title?: string | null;
+            subtitle?: string | null;
+            linkText?: string | null;
+            link?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contact-me';
+          }
+        | {
+            /**
+             * Recommended: 50–60 characters
+             */
+            title: string;
+            /**
+             * Recommended: 150–160 characters
+             */
+            description: string;
+            /**
+             * Recommended size: 1200×630
+             */
+            image?: (number | null) | Media;
+            noIndex?: boolean | null;
+            canonicalUrl?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'seo';
+          }
+      )[]
+    | null;
+  /**
+   * Add additional aside sections to the project page
+   */
+  asideBlocks?:
+    | (
+        | {
+            title: string;
+            subtitle?: string | null;
+            /**
+             * URL-friendly slug
+             */
+            slug?: string | null;
+            /**
+             * Choose the visual style for this section
+             */
+            style?: ('style1' | 'style2' | 'style3') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'section-head';
+          }
+        | {
+            showBadge?: boolean | null;
+            badgeText?: string | null;
+            headingText: string;
+            highlightStyle?: ('primary' | 'gradient' | 'underline') | null;
+            introText?: string | null;
+            primaryCTA?: {
+              show?: boolean | null;
+              text?: string | null;
+              /**
+               * URL or page slug
+               */
+              link?: string | null;
+            };
+            secondaryCTA?: {
+              show?: boolean | null;
+              text?: string | null;
+              icon?: string | null;
+              action?: ('download-resume' | 'custom-link') | null;
+              link?: string | null;
+            };
+            showSocialLinks?: boolean | null;
+            /**
+             * Select which social accounts to display in Hero
+             */
+            socialAccounts?: (number | SocialAccount)[] | null;
+            showHeroImage?: boolean | null;
+            /**
+             * Key resolved from personal details or global config
+             */
+            heroImageKey?: string | null;
+            floatingBadges?:
+              | {
+                  show?: boolean | null;
+                  position:
+                    | 'top-left'
+                    | 'top-right'
+                    | 'bottom-left'
+                    | 'bottom-right'
+                    | 'middle-left'
+                    | 'middle-right'
+                    | 'bottom-middle'
+                    | 'top-middle';
+                  /**
+                   * Show icon
+                   */
+                  enableIcon?: boolean | null;
+                  /**
+                   * Optional icon shown with this achievement
+                   */
+                  icon?: {
+                    enabled?: boolean | null;
+                    type?: ('lib' | 'image') | null;
+                    lib?: {
+                      /**
+                       * Icon name
+                       */
+                      name: string;
+                    };
+                    image?: (number | null) | Media;
+                    /**
+                     * Optional visual styling
+                     */
+                    style?: {
+                      styleEnabled?: boolean | null;
+                      color?: string | null;
+                      'bg-color'?: string | null;
+                      shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                    };
+                  };
+                  title?: string | null;
+                  value?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            layout?: ('image-right' | 'image-left') | null;
+            contentAlignment?: ('left' | 'center') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            itemsPerRow: number;
+            sourceType: 'manual' | 'collection';
+            manualConfig?: {
+              style: 'styleOne' | 'styleTwo';
+              cards?:
+                | {
+                    /**
+                     * Show icon
+                     */
+                    enableIcon?: boolean | null;
+                    /**
+                     * Optional icon shown with this achievement
+                     */
+                    icon?: {
+                      enabled?: boolean | null;
+                      type?: ('lib' | 'image') | null;
+                      lib?: {
+                        /**
+                         * Icon name
+                         */
+                        name: string;
+                      };
+                      image?: (number | null) | Media;
+                      /**
+                       * Optional visual styling
+                       */
+                      style?: {
+                        styleEnabled?: boolean | null;
+                        color?: string | null;
+                        'bg-color'?: string | null;
+                        shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                      };
+                    };
+                    title: string;
+                    subtitle?: string | null;
+                    description?: string | null;
+                    date?: string | null;
+                    id?: string | null;
+                  }[]
+                | null;
+            };
+            collectionConfig?: {
+              collection:
+                | 'achievements'
+                | 'certifications'
+                | 'education'
+                | 'experience'
+                | 'projects'
+                | 'skill-categories'
+                | 'skills';
+              fetchType: 'infinite' | 'selective';
+              items?:
+                | (
+                    | {
+                        relationTo: 'achievements';
+                        value: number | Achievement;
+                      }
+                    | {
+                        relationTo: 'certifications';
+                        value: number | Certification;
+                      }
+                    | {
+                        relationTo: 'education';
+                        value: number | Education;
+                      }
+                    | {
+                        relationTo: 'experience';
+                        value: number | Experience;
+                      }
+                    | {
+                        relationTo: 'projects';
+                        value: number | Project;
+                      }
+                    | {
+                        relationTo: 'skill-categories';
+                        value: number | SkillCategory;
+                      }
+                    | {
+                        relationTo: 'skills';
+                        value: number | Skill;
+                      }
+                  )[]
+                | null;
+              paginationType?: ('loadMore' | 'pagination') | null;
+              itemsPerPage?: number | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gridCards';
+          }
+        | {
+            visibility?: {
+              showEmail?: boolean | null;
+              showLocation?: boolean | null;
+              showQuote?: boolean | null;
+              showForm?: boolean | null;
+            };
+            quote?: string | null;
+            form?: {
+              nameLabel?: string | null;
+              emailLabel?: string | null;
+              messageLabel?: string | null;
+              messagePlaceholder?: string | null;
+              buttonText?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'get-in-touch';
+          }
+        | {
+            heading: {
+              title: string;
+              subtitle?: string | null;
+              /**
+               * Show icon
+               */
+              enableIcon?: boolean | null;
+              /**
+               * Optional icon shown with this achievement
+               */
+              icon?: {
+                enabled?: boolean | null;
+                type?: ('lib' | 'image') | null;
+                lib?: {
+                  /**
+                   * Icon name
+                   */
+                  name: string;
+                };
+                image?: (number | null) | Media;
+                /**
+                 * Optional visual styling
+                 */
+                style?: {
+                  styleEnabled?: boolean | null;
+                  color?: string | null;
+                  'bg-color'?: string | null;
+                  shape?: ('none' | 'rounded' | 'circle' | 'square') | null;
+                };
+              };
+            };
+            members?:
+              | {
+                  name: string;
+                  role?: string | null;
+                  email?: string | null;
+                  profileUrl?: string | null;
+                  avatar?: (number | null) | Media;
+                  /**
+                   * Mark as active contributor
+                   */
+                  isActive?: boolean | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Visual behavior controlled by renderer
+             */
+            displayOptions?: {
+              showEmail?: boolean | null;
+              showStatus?: boolean | null;
+              inactiveStyle?: ('faded' | 'labeled' | 'both') | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'team-members';
+          }
+        | {
+            title?: string | null;
+            subtitle?: string | null;
+            linkText?: string | null;
+            link?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contact-me';
+          }
+        | {
+            /**
+             * Recommended: 50–60 characters
+             */
+            title: string;
+            /**
+             * Recommended: 150–160 characters
+             */
+            description: string;
+            /**
+             * Recommended size: 1200×630
+             */
+            image?: (number | null) | Media;
+            noIndex?: boolean | null;
+            canonicalUrl?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'seo';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "languages".
+ */
+export interface Language {
+  id: number;
+  /**
+   * Name of the language
+   */
+  name: string;
+  /**
+   * Optional proficiency level
+   */
+  level?: ('' | 'basic' | 'conversational' | 'fluent' | 'native') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-details".
+ */
+export interface PersonalDetail {
+  id: number;
+  fullName: string;
+  jobTitle?: string | null;
+  bio?: string | null;
+  /**
+   * Upload a profile picture
+   */
+  profilePicture?: (number | null) | Media;
+  email: string;
+  phone?: string | null;
+  location?: string | null;
+  /**
+   * Upload resume in PDF format only
+   */
+  resume?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "connects".
+ */
+export interface Connect {
+  id: number;
+  name: string;
+  email: string;
+  subject?: string | null;
+  message: string;
+  /**
+   * Mark as read after reviewing
+   */
+  isRead?: boolean | null;
+  /**
+   * Submission timestamp
+   */
+  submittedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -181,20 +1662,68 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'skill-categories';
+        value: number | SkillCategory;
+      } | null)
+    | ({
+        relationTo: 'skills';
+        value: number | Skill;
+      } | null)
+    | ({
+        relationTo: 'languages';
+        value: number | Language;
+      } | null)
+    | ({
+        relationTo: 'social-accounts';
+        value: number | SocialAccount;
+      } | null)
+    | ({
+        relationTo: 'experience';
+        value: number | Experience;
+      } | null)
+    | ({
+        relationTo: 'achievements';
+        value: number | Achievement;
+      } | null)
+    | ({
+        relationTo: 'education';
+        value: number | Education;
+      } | null)
+    | ({
+        relationTo: 'certifications';
+        value: number | Certification;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'personal-details';
+        value: number | PersonalDetail;
+      } | null)
+    | ({
+        relationTo: 'connects';
+        value: number | Connect;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -204,10 +1733,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -227,7 +1756,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -257,10 +1786,253 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  layout?:
+    | T
+    | {
+        'section-head'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              slug?: T;
+              style?: T;
+              id?: T;
+              blockName?: T;
+            };
+        hero?:
+          | T
+          | {
+              showBadge?: T;
+              badgeText?: T;
+              headingText?: T;
+              highlightStyle?: T;
+              introText?: T;
+              primaryCTA?:
+                | T
+                | {
+                    show?: T;
+                    text?: T;
+                    link?: T;
+                  };
+              secondaryCTA?:
+                | T
+                | {
+                    show?: T;
+                    text?: T;
+                    icon?: T;
+                    action?: T;
+                    link?: T;
+                  };
+              showSocialLinks?: T;
+              socialAccounts?: T;
+              showHeroImage?: T;
+              heroImageKey?: T;
+              floatingBadges?:
+                | T
+                | {
+                    show?: T;
+                    position?: T;
+                    enableIcon?: T;
+                    icon?:
+                      | T
+                      | {
+                          enabled?: T;
+                          type?: T;
+                          lib?:
+                            | T
+                            | {
+                                name?: T;
+                              };
+                          image?: T;
+                          style?:
+                            | T
+                            | {
+                                styleEnabled?: T;
+                                color?: T;
+                                'bg-color'?: T;
+                                shape?: T;
+                              };
+                        };
+                    title?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              layout?: T;
+              contentAlignment?: T;
+              id?: T;
+              blockName?: T;
+            };
+        gridCards?:
+          | T
+          | {
+              itemsPerRow?: T;
+              sourceType?: T;
+              manualConfig?:
+                | T
+                | {
+                    style?: T;
+                    cards?:
+                      | T
+                      | {
+                          enableIcon?: T;
+                          icon?:
+                            | T
+                            | {
+                                enabled?: T;
+                                type?: T;
+                                lib?:
+                                  | T
+                                  | {
+                                      name?: T;
+                                    };
+                                image?: T;
+                                style?:
+                                  | T
+                                  | {
+                                      styleEnabled?: T;
+                                      color?: T;
+                                      'bg-color'?: T;
+                                      shape?: T;
+                                    };
+                              };
+                          title?: T;
+                          subtitle?: T;
+                          description?: T;
+                          date?: T;
+                          id?: T;
+                        };
+                  };
+              collectionConfig?:
+                | T
+                | {
+                    collection?: T;
+                    fetchType?: T;
+                    items?: T;
+                    paginationType?: T;
+                    itemsPerPage?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'get-in-touch'?:
+          | T
+          | {
+              visibility?:
+                | T
+                | {
+                    showEmail?: T;
+                    showLocation?: T;
+                    showQuote?: T;
+                    showForm?: T;
+                  };
+              quote?: T;
+              form?:
+                | T
+                | {
+                    nameLabel?: T;
+                    emailLabel?: T;
+                    messageLabel?: T;
+                    messagePlaceholder?: T;
+                    buttonText?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'team-members'?:
+          | T
+          | {
+              heading?:
+                | T
+                | {
+                    title?: T;
+                    subtitle?: T;
+                    enableIcon?: T;
+                    icon?:
+                      | T
+                      | {
+                          enabled?: T;
+                          type?: T;
+                          lib?:
+                            | T
+                            | {
+                                name?: T;
+                              };
+                          image?: T;
+                          style?:
+                            | T
+                            | {
+                                styleEnabled?: T;
+                                color?: T;
+                                'bg-color'?: T;
+                                shape?: T;
+                              };
+                        };
+                  };
+              members?:
+                | T
+                | {
+                    name?: T;
+                    role?: T;
+                    email?: T;
+                    profileUrl?: T;
+                    avatar?: T;
+                    isActive?: T;
+                    id?: T;
+                  };
+              displayOptions?:
+                | T
+                | {
+                    showEmail?: T;
+                    showStatus?: T;
+                    inactiveStyle?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'contact-me'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              linkText?: T;
+              link?: T;
+              id?: T;
+              blockName?: T;
+            };
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noIndex?: T;
+              canonicalUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  pageSettings?:
+    | T
+    | {
+        showHeader?: T;
+        showFooter?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  _key?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -272,6 +2044,808 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skill-categories_select".
+ */
+export interface SkillCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  order?: T;
+  isActive?: T;
+  icon?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        lib?:
+          | T
+          | {
+              name?: T;
+            };
+        image?: T;
+        style?:
+          | T
+          | {
+              styleEnabled?: T;
+              color?: T;
+              'bg-color'?: T;
+              shape?: T;
+            };
+      };
+  notes?: T;
+  relatedSkills?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skills_select".
+ */
+export interface SkillsSelect<T extends boolean = true> {
+  name?: T;
+  category?: T;
+  icon?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        lib?:
+          | T
+          | {
+              name?: T;
+            };
+        image?: T;
+        style?:
+          | T
+          | {
+              styleEnabled?: T;
+              color?: T;
+              'bg-color'?: T;
+              shape?: T;
+            };
+      };
+  isFeatured?: T;
+  Proficiency?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "languages_select".
+ */
+export interface LanguagesSelect<T extends boolean = true> {
+  name?: T;
+  level?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "social-accounts_select".
+ */
+export interface SocialAccountsSelect<T extends boolean = true> {
+  name?: T;
+  profileLink?: T;
+  icon?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        lib?:
+          | T
+          | {
+              name?: T;
+            };
+        image?: T;
+        style?:
+          | T
+          | {
+              styleEnabled?: T;
+              color?: T;
+              'bg-color'?: T;
+              shape?: T;
+            };
+      };
+  order?: T;
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experience_select".
+ */
+export interface ExperienceSelect<T extends boolean = true> {
+  company?: T;
+  role?: T;
+  location?: T;
+  employmentType?: T;
+  startDate?: T;
+  endDate?: T;
+  isCurrent?: T;
+  technologies?: T;
+  experiencePoints?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        isActive?: T;
+        id?: T;
+      };
+  order?: T;
+  isActive?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "achievements_select".
+ */
+export interface AchievementsSelect<T extends boolean = true> {
+  title?: T;
+  organization?: T;
+  date?: T;
+  description?: T;
+  icon?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        lib?:
+          | T
+          | {
+              name?: T;
+            };
+        image?: T;
+        style?:
+          | T
+          | {
+              styleEnabled?: T;
+              color?: T;
+              'bg-color'?: T;
+              shape?: T;
+            };
+      };
+  isFeatured?: T;
+  order?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "education_select".
+ */
+export interface EducationSelect<T extends boolean = true> {
+  degree?: T;
+  institution?: T;
+  fieldOfStudy?: T;
+  grade?: T;
+  startDate?: T;
+  endDate?: T;
+  isCurrent?: T;
+  achievements?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        isActive?: T;
+        id?: T;
+      };
+  icon?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        lib?:
+          | T
+          | {
+              name?: T;
+            };
+        image?: T;
+        style?:
+          | T
+          | {
+              styleEnabled?: T;
+              color?: T;
+              'bg-color'?: T;
+              shape?: T;
+            };
+      };
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certifications_select".
+ */
+export interface CertificationsSelect<T extends boolean = true> {
+  title?: T;
+  issuingOrganization?: T;
+  issueDate?: T;
+  expiryDate?: T;
+  notes?: T;
+  credentialID?: T;
+  credentialURL?: T;
+  icon?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        lib?:
+          | T
+          | {
+              name?: T;
+            };
+        image?: T;
+        style?:
+          | T
+          | {
+              styleEnabled?: T;
+              color?: T;
+              'bg-color'?: T;
+              shape?: T;
+            };
+      };
+  isFeatured?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  overview?: T;
+  banner?: T;
+  enableIcon?: T;
+  icon?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        lib?:
+          | T
+          | {
+              name?: T;
+            };
+        image?: T;
+        style?:
+          | T
+          | {
+              styleEnabled?: T;
+              color?: T;
+              'bg-color'?: T;
+              shape?: T;
+            };
+      };
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        icon?:
+          | T
+          | {
+              enabled?: T;
+              type?: T;
+              lib?:
+                | T
+                | {
+                    name?: T;
+                  };
+              image?: T;
+              style?:
+                | T
+                | {
+                    styleEnabled?: T;
+                    color?: T;
+                    'bg-color'?: T;
+                    shape?: T;
+                  };
+            };
+        id?: T;
+      };
+  technologies?: T;
+  order?: T;
+  notes?: T;
+  style?: T;
+  blocks?:
+    | T
+    | {
+        'section-head'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              slug?: T;
+              style?: T;
+              id?: T;
+              blockName?: T;
+            };
+        hero?:
+          | T
+          | {
+              showBadge?: T;
+              badgeText?: T;
+              headingText?: T;
+              highlightStyle?: T;
+              introText?: T;
+              primaryCTA?:
+                | T
+                | {
+                    show?: T;
+                    text?: T;
+                    link?: T;
+                  };
+              secondaryCTA?:
+                | T
+                | {
+                    show?: T;
+                    text?: T;
+                    icon?: T;
+                    action?: T;
+                    link?: T;
+                  };
+              showSocialLinks?: T;
+              socialAccounts?: T;
+              showHeroImage?: T;
+              heroImageKey?: T;
+              floatingBadges?:
+                | T
+                | {
+                    show?: T;
+                    position?: T;
+                    enableIcon?: T;
+                    icon?:
+                      | T
+                      | {
+                          enabled?: T;
+                          type?: T;
+                          lib?:
+                            | T
+                            | {
+                                name?: T;
+                              };
+                          image?: T;
+                          style?:
+                            | T
+                            | {
+                                styleEnabled?: T;
+                                color?: T;
+                                'bg-color'?: T;
+                                shape?: T;
+                              };
+                        };
+                    title?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              layout?: T;
+              contentAlignment?: T;
+              id?: T;
+              blockName?: T;
+            };
+        gridCards?:
+          | T
+          | {
+              itemsPerRow?: T;
+              sourceType?: T;
+              manualConfig?:
+                | T
+                | {
+                    style?: T;
+                    cards?:
+                      | T
+                      | {
+                          enableIcon?: T;
+                          icon?:
+                            | T
+                            | {
+                                enabled?: T;
+                                type?: T;
+                                lib?:
+                                  | T
+                                  | {
+                                      name?: T;
+                                    };
+                                image?: T;
+                                style?:
+                                  | T
+                                  | {
+                                      styleEnabled?: T;
+                                      color?: T;
+                                      'bg-color'?: T;
+                                      shape?: T;
+                                    };
+                              };
+                          title?: T;
+                          subtitle?: T;
+                          description?: T;
+                          date?: T;
+                          id?: T;
+                        };
+                  };
+              collectionConfig?:
+                | T
+                | {
+                    collection?: T;
+                    fetchType?: T;
+                    items?: T;
+                    paginationType?: T;
+                    itemsPerPage?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'get-in-touch'?:
+          | T
+          | {
+              visibility?:
+                | T
+                | {
+                    showEmail?: T;
+                    showLocation?: T;
+                    showQuote?: T;
+                    showForm?: T;
+                  };
+              quote?: T;
+              form?:
+                | T
+                | {
+                    nameLabel?: T;
+                    emailLabel?: T;
+                    messageLabel?: T;
+                    messagePlaceholder?: T;
+                    buttonText?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'team-members'?:
+          | T
+          | {
+              heading?:
+                | T
+                | {
+                    title?: T;
+                    subtitle?: T;
+                    enableIcon?: T;
+                    icon?:
+                      | T
+                      | {
+                          enabled?: T;
+                          type?: T;
+                          lib?:
+                            | T
+                            | {
+                                name?: T;
+                              };
+                          image?: T;
+                          style?:
+                            | T
+                            | {
+                                styleEnabled?: T;
+                                color?: T;
+                                'bg-color'?: T;
+                                shape?: T;
+                              };
+                        };
+                  };
+              members?:
+                | T
+                | {
+                    name?: T;
+                    role?: T;
+                    email?: T;
+                    profileUrl?: T;
+                    avatar?: T;
+                    isActive?: T;
+                    id?: T;
+                  };
+              displayOptions?:
+                | T
+                | {
+                    showEmail?: T;
+                    showStatus?: T;
+                    inactiveStyle?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'contact-me'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              linkText?: T;
+              link?: T;
+              id?: T;
+              blockName?: T;
+            };
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noIndex?: T;
+              canonicalUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  asideBlocks?:
+    | T
+    | {
+        'section-head'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              slug?: T;
+              style?: T;
+              id?: T;
+              blockName?: T;
+            };
+        hero?:
+          | T
+          | {
+              showBadge?: T;
+              badgeText?: T;
+              headingText?: T;
+              highlightStyle?: T;
+              introText?: T;
+              primaryCTA?:
+                | T
+                | {
+                    show?: T;
+                    text?: T;
+                    link?: T;
+                  };
+              secondaryCTA?:
+                | T
+                | {
+                    show?: T;
+                    text?: T;
+                    icon?: T;
+                    action?: T;
+                    link?: T;
+                  };
+              showSocialLinks?: T;
+              socialAccounts?: T;
+              showHeroImage?: T;
+              heroImageKey?: T;
+              floatingBadges?:
+                | T
+                | {
+                    show?: T;
+                    position?: T;
+                    enableIcon?: T;
+                    icon?:
+                      | T
+                      | {
+                          enabled?: T;
+                          type?: T;
+                          lib?:
+                            | T
+                            | {
+                                name?: T;
+                              };
+                          image?: T;
+                          style?:
+                            | T
+                            | {
+                                styleEnabled?: T;
+                                color?: T;
+                                'bg-color'?: T;
+                                shape?: T;
+                              };
+                        };
+                    title?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              layout?: T;
+              contentAlignment?: T;
+              id?: T;
+              blockName?: T;
+            };
+        gridCards?:
+          | T
+          | {
+              itemsPerRow?: T;
+              sourceType?: T;
+              manualConfig?:
+                | T
+                | {
+                    style?: T;
+                    cards?:
+                      | T
+                      | {
+                          enableIcon?: T;
+                          icon?:
+                            | T
+                            | {
+                                enabled?: T;
+                                type?: T;
+                                lib?:
+                                  | T
+                                  | {
+                                      name?: T;
+                                    };
+                                image?: T;
+                                style?:
+                                  | T
+                                  | {
+                                      styleEnabled?: T;
+                                      color?: T;
+                                      'bg-color'?: T;
+                                      shape?: T;
+                                    };
+                              };
+                          title?: T;
+                          subtitle?: T;
+                          description?: T;
+                          date?: T;
+                          id?: T;
+                        };
+                  };
+              collectionConfig?:
+                | T
+                | {
+                    collection?: T;
+                    fetchType?: T;
+                    items?: T;
+                    paginationType?: T;
+                    itemsPerPage?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'get-in-touch'?:
+          | T
+          | {
+              visibility?:
+                | T
+                | {
+                    showEmail?: T;
+                    showLocation?: T;
+                    showQuote?: T;
+                    showForm?: T;
+                  };
+              quote?: T;
+              form?:
+                | T
+                | {
+                    nameLabel?: T;
+                    emailLabel?: T;
+                    messageLabel?: T;
+                    messagePlaceholder?: T;
+                    buttonText?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'team-members'?:
+          | T
+          | {
+              heading?:
+                | T
+                | {
+                    title?: T;
+                    subtitle?: T;
+                    enableIcon?: T;
+                    icon?:
+                      | T
+                      | {
+                          enabled?: T;
+                          type?: T;
+                          lib?:
+                            | T
+                            | {
+                                name?: T;
+                              };
+                          image?: T;
+                          style?:
+                            | T
+                            | {
+                                styleEnabled?: T;
+                                color?: T;
+                                'bg-color'?: T;
+                                shape?: T;
+                              };
+                        };
+                  };
+              members?:
+                | T
+                | {
+                    name?: T;
+                    role?: T;
+                    email?: T;
+                    profileUrl?: T;
+                    avatar?: T;
+                    isActive?: T;
+                    id?: T;
+                  };
+              displayOptions?:
+                | T
+                | {
+                    showEmail?: T;
+                    showStatus?: T;
+                    inactiveStyle?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'contact-me'?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              linkText?: T;
+              link?: T;
+              id?: T;
+              blockName?: T;
+            };
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noIndex?: T;
+              canonicalUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-details_select".
+ */
+export interface PersonalDetailsSelect<T extends boolean = true> {
+  fullName?: T;
+  jobTitle?: T;
+  bio?: T;
+  profilePicture?: T;
+  email?: T;
+  phone?: T;
+  location?: T;
+  resume?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "connects_select".
+ */
+export interface ConnectsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  subject?: T;
+  message?: T;
+  isRead?: T;
+  submittedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -312,6 +2886,119 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: number;
+  /**
+   * Logo settings shown in header
+   */
+  logo?: {
+    type?: ('text' | 'image' | 'url') | null;
+    text?: string | null;
+    highlight?: string | null;
+    image?: (number | null) | Media;
+    imageUrl?: string | null;
+  };
+  navItems?:
+    | {
+        label: string;
+        url: string;
+        newTab?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  /**
+   * Logo settings shown in Footer
+   */
+  logo?: {
+    type?: ('text' | 'image' | 'url') | null;
+    text?: string | null;
+    highlight?: string | null;
+    image?: (number | null) | Media;
+    imageUrl?: string | null;
+  };
+  navItems?:
+    | {
+        label: string;
+        url: string;
+        newTab?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  quote?: string | null;
+  /**
+   * Select which social accounts to display in Hero
+   */
+  socialAccounts?: (number | SocialAccount)[] | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  logo?:
+    | T
+    | {
+        type?: T;
+        text?: T;
+        highlight?: T;
+        image?: T;
+        imageUrl?: T;
+      };
+  navItems?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  logo?:
+    | T
+    | {
+        type?: T;
+        text?: T;
+        highlight?: T;
+        image?: T;
+        imageUrl?: T;
+      };
+  navItems?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        newTab?: T;
+        id?: T;
+      };
+  quote?: T;
+  socialAccounts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
